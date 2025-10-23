@@ -1,15 +1,8 @@
 //
-//  ContentView.swift
-//  Journali
+//  Untitled.swift
+//  mvvmtest
 //
-//  Created by رحاب فهد  on 27/04/1447 AH.
-//
-
-//
-//  ContentView.swift
-//  try
-//
-//  Created by رحاب فهد  on 28/04/1447 AH.
+//  Created by رحاب فهد  on 01/05/1447 AH.
 //
 
 import SwiftUI
@@ -20,7 +13,6 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // 🎨 خلفية متدرجة
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color(red: 0.15, green: 0.1, blue: 0.2),
@@ -58,13 +50,12 @@ struct ContentView: View {
                         .tint(.white)
                         .padding(.top, 40)
                     } else {
-                        // Fallback on earlier versions
+                        // Fallback
                     }
                 }
                 .navigationDestination(isPresented: $startApp) {
                     MainPage()
                 }
-
             }
         }
         .preferredColorScheme(.dark)

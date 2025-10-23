@@ -1,14 +1,14 @@
 //
-//  Untitled.swift
-//  Journali
+//  mvvmtestApp.swift
+//  mvvmtest
 //
-//  Created by رحاب فهد  on 29/04/1447 AH.
+//  Created by رحاب فهد  on 01/05/1447 AH.
 //
 
 import SwiftUI
 
 @main
-struct tryApp: App {
+struct mvvmtestApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

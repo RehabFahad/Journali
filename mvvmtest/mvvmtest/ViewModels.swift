@@ -1,26 +1,18 @@
-//
-//  Untitled.swift
-//  mvvmtest
-//
-//  Created by رحاب فهد  on 01/05/1447 AH.
-//
 
-// 📁 ViewModels/JournalViewModel.swift
-import Foundation
 import SwiftUI
+import Combine
 
 class JournalViewModel: ObservableObject {
-    @AppStorage("journalEntriesData") private var journalEntriesData: Data = Data()
+   
     
+    @AppStorage("journalEntriesData") private var journalEntriesData: Data = Data()
     @Published var entries: [JournalEntry] = []
     @Published var sortNewestFirst: Bool = true
     @Published var searchText: String = ""
 
-    init() {
-        loadEntries()
-        sortEntries()
-    }
+   
 
+    // إضافة entry جديد
     func addEntry(title: String, body: String) {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let finalTitle = trimmedTitle.isEmpty ? "Untitled" : trimmedTitle
@@ -30,47 +22,56 @@ class JournalViewModel: ObservableObject {
         saveEntries()
     }
 
+    // حذف entry
     func deleteEntry(_ entry: JournalEntry) {
-        entries.removeAll { $0.id == entry.id }
-        saveEntries()
-    }
-
-    func toggleBookmark(entryID: UUID) {
-        if let i = entries.firstIndex(where: { $0.id == entryID }) {
-            entries[i].bookmarked.toggle()
+        if let index = entries.firstIndex(where: { $0.id == entry.id }) {
+            entries.remove(at: index)
             saveEntries()
         }
     }
 
+    // تبديل bookmark
+    func toggleBookmark(entryID: UUID) {
+        if let index = entries.firstIndex(where: { $0.id == entryID }) {
+            entries[index].bookmarked.toggle()
+            saveEntries()
+        }
+    }
+
+    // ترتيب الـ entries
     func sortEntries() {
-        entries.sort {
-            sortNewestFirst ? $0.date > $1.date : $0.date < $1.date
+        if sortNewestFirst {
+            entries.sort { $0.date > $1.date }
+        } else {
+            entries.sort { $0.date < $1.date }
         }
     }
 
+    // فلترة الـ entries بناءً على البحث
     func filteredEntries() -> [JournalEntry] {
-        let q = searchText.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !q.isEmpty else { return entries }
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return entries
+        }
+        let query = searchText.lowercased()
         return entries.filter {
-            $0.title.lowercased().contains(q) || $0.body.lowercased().contains(q)
+            $0.title.lowercased().contains(query) || $0.body.lowercased().contains(query)
         }
     }
 
+    // حفظ الـ entries
     private func saveEntries() {
         if let encoded = try? JSONEncoder().encode(entries) {
             journalEntriesData = encoded
         }
     }
 
+    // تحميل الـ entries
     private func loadEntries() {
         if let decoded = try? JSONDecoder().decode([JournalEntry].self, from: journalEntriesData) {
             entries = decoded
         } else {
-            entries = [
-                JournalEntry(id: UUID(), title: "My Birthday", body: "Lorem ipsum...", date: Date()),
-                JournalEntry(id: UUID(), title: "Today's Journal", body: "Lorem ipsum...", date: Date().addingTimeInterval(-86400)),
-                JournalEntry(id: UUID(), title: "Great Day", body: "Lorem ipsum...", date: Date().addingTimeInterval(-172800))
-            ]
+            // بيانات تجريبية
+           
             saveEntries()
         }
     }

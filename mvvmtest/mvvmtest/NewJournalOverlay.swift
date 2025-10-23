@@ -17,5 +17,10 @@ struct NewJournalOverlay: View {
                         }
                         .buttonStyle(.glassProminent)
                         .tint(.white)
-                    } else {
-                        // Fallback
+                    }
+                }
+            }
+        }
+    }
+}
+

@@ -1,17 +1,3 @@
-//
-//  ContentView.swift
-//  Journali
-//
-//  Created by رحاب فهد  on 27/04/1447 AH.
-//
-
-//
-//  ContentView.swift
-//  try
-//
-//  Created by رحاب فهد  on 28/04/1447 AH.
-//
-
 import SwiftUI
 
 struct ContentView: View {
@@ -45,26 +31,15 @@ struct ContentView: View {
                     Text("Your thoughts, your story")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.white.opacity(0.8))
-
-                    if #available(iOS 26.0, *) {
-                        Button(action: {
-                            startApp = true
-                        }) {
-                            Text("Start Journaling")
-                                .font(.headline)
-                                .frame(width: 180, height: 50)
-                        }
-                        .buttonStyle(.glassProminent)
-                        .tint(.white)
-                        .padding(.top, 40)
-                    } else {
-                        // Fallback on earlier versions
+                }
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        startApp = true
                     }
                 }
                 .navigationDestination(isPresented: $startApp) {
                     MainPage()
                 }
-
             }
         }
         .preferredColorScheme(.dark)
@@ -74,3 +49,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+

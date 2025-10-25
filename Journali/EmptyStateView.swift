@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 // نموذج اليومية
@@ -10,8 +9,15 @@ struct JournalEntry: Identifiable, Codable {
     var bookmarked: Bool = false
 }
 
-// MainPage معدّلة
 struct MainPage: View {
+    @FocusState private var titleFieldFocused: Bool
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.dateFormat = "dd/MM/yyyy"
+        return formatter.string(from: Date())
+    }
+
     @AppStorage("journalEntriesData") private var journalEntriesData: Data = Data()
     @State private var entries: [JournalEntry] = []
     @State private var showingComposer = false
@@ -22,13 +28,7 @@ struct MainPage: View {
     @State private var selectedEntryID: UUID? = nil
     @State private var showDeleteAlert = false
     @State private var entryToDelete: JournalEntry? = nil
-
-
-
-
-
-
-    // لون عنواين اليوميات المخفف
+    @State private var startApp = false
     private let journalTitlePurple = Color(red: 0.76, green: 0.68, blue: 0.90)
 
     var body: some View {
@@ -120,19 +120,15 @@ struct MainPage: View {
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
-
-
                                 .tint(.clear)
                                 .background(.ultraThinMaterial)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-
                             }
                         }
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
-
                 }
 
                 Spacer()
@@ -164,53 +160,83 @@ struct MainPage: View {
         .sheet(isPresented: $showingComposer) {
             NavigationView {
                 VStack(spacing: 12) {
+                    
                     TextField("Title", text: $composeTitle)
-                        .textFieldStyle(.roundedBorder)
-                        .padding(.horizontal)
+                        .font(.system(size: 30, weight: .semibold, ))
+                        .padding(.leading, 9)
+                        .foregroundColor(.white)
+                        .accentColor(Color.purple.opacity(0.7))
+                        .focused($titleFieldFocused)
 
+                    Text(formattedDate)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.white.opacity(0.7))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 9)
+
+                    TextField("Type your Journal...", text: $composeTitle)
+                        .font(.system(size: 20, design: .rounded))
+                                                .padding(.horizontal)
+
+                      
+                    
+                    
+                    
                     TextEditor(text: $composeBody)
-                        .frame(minHeight: 200)
-                        .padding(8)
-                        .background(Color(white: 0.06))
-                        .cornerRadius(8)
-                        .padding(.horizontal)
+                        .font(.system(size: 20, design: .rounded))
+                        .padding(.leading, 8)
+                        .foregroundColor(.white)
 
                     Spacer()
                 }
-                .navigationTitle("New Entry")
+                .padding(.top, 25)
+                .onAppear {
+                    titleFieldFocused = true
+                }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { showingComposer = false }
+                        Button(action: {
+                            showingComposer = false
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.white)
+                            
+                        }
                     }
+
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
+                        Button(action: {
                             addEntry(title: composeTitle, body: composeBody)
                             showingComposer = false
+                        }) {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.white)
                         }
-                        .disabled(composeTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && composeBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(
+                            composeTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                            composeBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
                     }
                 }
             }
-       
-    }
-    
+        }
+
 
         DeleteConfirmationView(isPresented: $showDeleteAlert) {
             guard let entry = entryToDelete else { return }
             deleteEntry(entry)
             entryToDelete = nil
         }
-
     }
 
     // MARK: - Helpers
+
     private func deleteEntry(_ entry: JournalEntry) {
         if let index = entries.firstIndex(where: { $0.id == entry.id }) {
             entries.remove(at: index)
             saveEntries()
         }
     }
-
 
     private func addEntry(title: String, body: String) {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -249,11 +275,10 @@ struct MainPage: View {
         if let decoded = try? JSONDecoder().decode([JournalEntry].self, from: journalEntriesData) {
             entries = decoded
         } else {
-            // بيانات تجريبية
             entries = [
-                JournalEntry(id: UUID(), title: "My Birthday", body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec odio. Quisque volutpat mattis eros. Nullam malesuada...", date: Date()),
-                JournalEntry(id: UUID(), title: "Today's Journal", body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec odio. Quisque volutpat...", date: Date().addingTimeInterval(-3600*24)),
-                JournalEntry(id: UUID(), title: "Great Day", body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse urna nibh viverra non...", date: Date().addingTimeInterval(-3600*48))
+                JournalEntry(id: UUID(), title: "My Birthday", body: "Lorem ipsum dolor sit amet...", date: Date()),
+                JournalEntry(id: UUID(), title: "Today's Journal", body: "Lorem ipsum dolor sit amet...", date: Date().addingTimeInterval(-3600*24)),
+                JournalEntry(id: UUID(), title: "Great Day", body: "Lorem ipsum dolor sit amet...", date: Date().addingTimeInterval(-3600*48))
             ]
             saveEntries()
         }
@@ -273,67 +298,6 @@ struct MainPage: View {
             entries[i].bookmarked.toggle()
             saveEntries()
         }
-    }
-}
-
-// بطاقة كبيرة جديدة بمظهر مشابه للصورة: عنوان، تاريخ تحت العنوان، ثم معاينة النص، وأيقونة الحفظ في الركن الأيمن العلوي
-struct LargeJournalCard: View {
-    let entry: JournalEntry
-    let titleColor: Color
-    let isSelected: Bool
-    let onTap: () -> Void
-    let onToggleBookmark: () -> Void
-
-    var body: some View {
-        Button(action: onTap) {
-            ZStack(alignment: .topTrailing) {
-                VStack(alignment: .leading, spacing: 10) {
-                    // العنوان الكبير
-                    Text(entry.title)
-                        .font(.system(size: 26, weight: .semibold, design: .rounded))
-                        .foregroundColor(titleColor)
-                        .lineLimit(1)
-
-                    // التاريخ تحت العنوان بخط أصغر وبألوان خفيفة
-                    Text(longDate(entry.date))
-                        .font(.system(size: 13, weight: .regular, design: .rounded))
-                        .foregroundColor(.white.opacity(0.65))
-
-                    // نص المعاينة
-                    Text(entry.body)
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineLimit(4)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Spacer(minLength: 6)
-                }
-                .padding(.all, 22)
-                .frame(maxWidth: .infinity, minHeight: 180, alignment: .leading)
-                .background(Color(red: 0.06, green: 0.06, blue: 0.07))
-                .cornerRadius(20)
-                .shadow(color: Color.black.opacity(0.35), radius: isSelected ? 8 : 4, x: 0, y: 2)
-
-                // أيقونةBookmark صغيرة في الزاوية العلوية اليمنى
-                Button(action: {
-                    onToggleBookmark()
-                }) {
-                    Image(systemName: entry.bookmarked ? "bookmark.fill" : "bookmark")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(entry.bookmarked ? titleColor : Color.white.opacity(0.85))
-                        .padding(12)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-
-    private func longDate(_ date: Date) -> String {
-        let fmt = DateFormatter()
-        fmt.dateStyle = .medium
-        fmt.timeStyle = .none
-        return fmt.string(from: date)
     }
 }
 

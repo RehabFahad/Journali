@@ -7,15 +7,14 @@ struct DeleteConfirmationView: View {
     var onDelete: () -> Void
 
     var body: some View {
-        if isPresented {
-            ZStack {
-                // 🖤 خلفية تغطية ناعمة
+        ZStack {
+            if isPresented {
+                // خلفية تغطية ناعمة
                 Color.black.opacity(0.45)
                     .ignoresSafeArea()
                     .transition(.opacity)
-                    .blur(radius: 1)
 
-                // 🪟 نافذة تأكيد بزجاج حقيقي
+                // نافذة تأكيد في منتصف الشاشة
                 VStack(spacing: 20) {
                     Text("Delete Journal?")
                         .font(.title2)
@@ -29,7 +28,6 @@ struct DeleteConfirmationView: View {
                         .padding(.horizontal)
 
                     HStack(spacing: 16) {
-                        // زر Cancel بزجاج ناعم
                         Button("Cancel") {
                             withAnimation {
                                 isPresented = false
@@ -41,21 +39,17 @@ struct DeleteConfirmationView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .foregroundColor(.white)
 
-                        // زر Delete بزجاج حقيقي
-                        if #available(iOS 26.0, *) {
-                            Button("Delete") {
-                                withAnimation {
-                                    isPresented = false
-                                    onDelete()
-                                }
+                        Button("Delete") {
+                            withAnimation {
+                                isPresented = false
+                                onDelete()
                             }
-                            .font(.headline)
-                            .frame(width: 120, height: 44)
-                            .buttonStyle(.glassProminent)
-                            .tint(.red)
-                        } else {
-                            // Fallback on earlier versions
                         }
+                        .font(.headline)
+                        .frame(width: 120, height: 44)
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .foregroundColor(.red)
                     }
                 }
                 .padding()
@@ -64,9 +58,9 @@ struct DeleteConfirmationView: View {
                 .shadow(color: .black.opacity(0.5), radius: 12, x: 0, y: 6)
                 .frame(maxWidth: 340)
                 .transition(.scale)
+                .zIndex(1) // تأكيد أن النافذة فوق كل شيء
             }
-            .animation(.easeInOut(duration: 0.25), value: isPresented)
         }
+        .animation(.easeInOut(duration: 0.25), value: isPresented)
     }
 }
-

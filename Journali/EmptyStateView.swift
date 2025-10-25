@@ -13,7 +13,6 @@ struct MainPage: View {
     @FocusState private var titleFieldFocused: Bool
     private var formattedDate: String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
         formatter.dateFormat = "dd/MM/yyyy"
         return formatter.string(from: Date())
     }
@@ -78,7 +77,7 @@ struct MainPage: View {
                 if entries.isEmpty {
                     Spacer()
 
-                    Image("Book")
+                    Image("emptyNotebookIcon")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 180, height: 180)
@@ -92,8 +91,10 @@ struct MainPage: View {
                             .font(.system(size: 16, design: .rounded))
                             .foregroundColor(.white.opacity(0.7))
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
+                            .padding(.horizontal, 59)
                     }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 0)
 
                     Spacer()
                 } else {
@@ -174,18 +175,14 @@ struct MainPage: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 9)
 
-                    TextField("Type your Journal...", text: $composeTitle)
+                    TextField("Type your Journal...", text: $composeBody)
+
                         .font(.system(size: 20, design: .rounded))
                                                 .padding(.horizontal)
 
-                      
+
                     
-                    
-                    
-                    TextEditor(text: $composeBody)
-                        .font(.system(size: 20, design: .rounded))
-                        .padding(.leading, 8)
-                        .foregroundColor(.white)
+                  
 
                     Spacer()
                 }
@@ -222,11 +219,16 @@ struct MainPage: View {
         }
 
 
-        DeleteConfirmationView(isPresented: $showDeleteAlert) {
-            guard let entry = entryToDelete else { return }
-            deleteEntry(entry)
-            entryToDelete = nil
+        .overlay {
+            if showDeleteAlert, let entry = entryToDelete {
+                DeleteConfirmationView(isPresented: $showDeleteAlert) {
+                    deleteEntry(entry)
+                    entryToDelete = nil
+                }
+            }
         }
+
+
     }
 
     // MARK: - Helpers

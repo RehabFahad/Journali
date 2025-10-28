@@ -1,6 +1,5 @@
 import SwiftUI
 
-// نموذج اليومية
 struct JournalEntry: Identifiable, Codable {
     let id: UUID
     let title: String
@@ -30,7 +29,7 @@ struct MainPage: View {
     @State private var startApp = false
     private let journalTitlePurple = Color(red: 0.76, green: 0.68, blue: 0.90)
 
-    var body: some View {
+     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
@@ -73,7 +72,7 @@ struct MainPage: View {
                 }
                 .padding(.horizontal)
 
-                // محتوى الصفحة / بطاقات اليوميات
+                // محتوى الصفحة
                 if entries.isEmpty {
                     Spacer()
 
@@ -94,7 +93,6 @@ struct MainPage: View {
                             .padding(.horizontal, 59)
                     }
                     .padding(.horizontal, 12)
-                    .padding(.vertical, 0)
 
                     Spacer()
                 } else {
@@ -112,47 +110,52 @@ struct MainPage: View {
                                 onToggleBookmark: { toggleBookmark(entryID: entry.id) }
                             )
                             .listRowBackground(Color.clear)
+                                       .listRowSeparator(.hidden) 
+                            .listRowBackground(Color.clear)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     withAnimation {
                                         entryToDelete = entry
                                         showDeleteAlert = true
+                                        
                                     }
+                                    
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
-                                .tint(.clear)
-                                .background(.ultraThinMaterial)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                                .tint(Color(hex: "FF3B30"))
                             }
                         }
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
+                    
                 }
-
-                Spacer()
-
-                // شريط البحث
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.white.opacity(0.7))
-
-                    TextField("Search your entries...", text: $searchText)
-                        .foregroundColor(.white)
-                        .disableAutocorrection(true)
-
-                    Spacer()
-
-                    Image(systemName: "mic.fill")
-                        .foregroundColor(.white.opacity(0.7))
-                }
-                .padding()
-                .background(Color.gray.opacity(0.18))
-                .clipShape(RoundedRectangle(cornerRadius: 30))
-                .padding(.horizontal)
             }
+            .padding(.top)
+
+            // السيرش بار الزجاجي يطفو تحت
+            .overlay(alignment: .bottom) {
+                VStack {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.white.opacity(0.7))
+                        TextField("Search your entries...", text: $searchText)
+                            .foregroundColor(.white)
+                            .disableAutocorrection(true)
+                        Spacer()
+                        Image(systemName: "mic.fill")
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .padding()
+                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                    .padding(.horizontal)
+                    .glassEffect(.clear)
+                    .background(Color.black.opacity(0.001))
+                }
+                .padding(.bottom, 12) // ← هذا يرفع الشريط بدون ما يكبره
+            }
+
         }
         .onAppear {
             loadEntries()
@@ -161,13 +164,13 @@ struct MainPage: View {
         .sheet(isPresented: $showingComposer) {
             NavigationView {
                 VStack(spacing: 12) {
-                    
                     TextField("Title", text: $composeTitle)
-                        .font(.system(size: 30, weight: .semibold, ))
+                        .font(.system(size: 30, weight: .semibold))
                         .padding(.leading, 9)
                         .foregroundColor(.white)
-                        .accentColor(Color.purple.opacity(0.7))
+                        .tint(Color(hex: "A499FF")) // ← لون المؤشر بنفسجي فاتح
                         .focused($titleFieldFocused)
+
 
                     Text(formattedDate)
                         .font(.system(size: 14, weight: .regular, design: .rounded))
@@ -176,19 +179,17 @@ struct MainPage: View {
                         .padding(.leading, 9)
 
                     TextField("Type your Journal...", text: $composeBody)
-
                         .font(.system(size: 20, design: .rounded))
-                                                .padding(.horizontal)
-
-
-                    
-                  
+                        .padding(.horizontal)
+                        .tint(Color(hex: "A499FF"))
 
                     Spacer()
                 }
                 .padding(.top, 25)
                 .onAppear {
-                    titleFieldFocused = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        titleFieldFocused = true
+                    }
                 }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
@@ -197,8 +198,8 @@ struct MainPage: View {
                         }) {
                             Image(systemName: "xmark")
                                 .foregroundColor(.white)
-                            
                         }
+                        .glassEffect(.clear)
                     }
 
                     ToolbarItem(placement: .confirmationAction) {
@@ -217,8 +218,6 @@ struct MainPage: View {
                 }
             }
         }
-
-
         .overlay {
             if showDeleteAlert, let entry = entryToDelete {
                 DeleteConfirmationView(isPresented: $showDeleteAlert) {
@@ -227,9 +226,8 @@ struct MainPage: View {
                 }
             }
         }
-
-
     }
+
 
     // MARK: - Helpers
 

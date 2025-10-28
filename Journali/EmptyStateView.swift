@@ -218,14 +218,19 @@ struct MainPage: View {
                 }
             }
         }
-        .overlay {
-            if showDeleteAlert, let entry = entryToDelete {
-                DeleteConfirmationView(isPresented: $showDeleteAlert) {
-                    deleteEntry(entry)
-                    entryToDelete = nil
-                }
+        .alert("Delete Journal?", isPresented: $showDeleteAlert, presenting: entryToDelete) { entry in
+            Button("Delete", role: .destructive) {
+                deleteEntry(entry)
+                entryToDelete = nil
             }
+            Button("Cancel", role: .cancel) {
+                entryToDelete = nil
+            }
+        } message: { entry in
+            Text("Are you sure you want to delete this journal?")
         }
+        .preferredColorScheme(.dark)
+
     }
 
 

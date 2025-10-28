@@ -13,7 +13,7 @@ struct DeleteConfirmationView: View {
                     RoundedRectangle(cornerRadius: 1, style: .continuous)
                         .fill(.clear)
                         .frame(width: 400, height: 200)
-                        .glassEffect
+                        .glassEffect(.regular)
                         .shadow(color: .black.opacity(0.5), radius: 12, x: 0, y: 6)
 
                     
